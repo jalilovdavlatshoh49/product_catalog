@@ -17,8 +17,9 @@ export const useProductStore = defineStore('product', {
         const data = await fetchProducts()
         this.products = data
         this.filtered = data
+        console.log('✅ Продуктҳо боргирӣ шуданд:', data)
       } catch (error) {
-        this.error = "❌ Ошибка загрузки продуктов"
+        this.error = "❌ Хатогӣ ҳангоми боркунии маҳсулот"
         console.error(this.error, error)
       } finally {
         this.loading = false
@@ -27,16 +28,19 @@ export const useProductStore = defineStore('product', {
 
     filterBy({ price, brand, category }) {
       this.filtered = this.products.filter(p => {
-        return (
-          (!price || p.price <= price) &&
-          (!brand || p.brand === brand) &&
-          (!category || p.category === category)
-        )
+        const matchPrice = !price || p.price <= price
+        // Азбаски бренд нест, ин шартро ҳамеша TRUE мегузорем
+        const matchBrand = true
+        const matchCategory = !category || p.category === category
+        return matchPrice && matchBrand && matchCategory
       })
+
+      console.log('🔍 Маҳсулотҳои филтршуда:', this.filtered)
     },
 
     resetFilter() {
       this.filtered = [...this.products]
+      console.log('♻️ Филтрҳо тоза шуданд')
     }
   },
 
@@ -44,13 +48,12 @@ export const useProductStore = defineStore('product', {
     filteredCount: (state) => state.filtered.length,
 
     uniqueBrands: (state) => {
-      const brands = state.products.map(p => p.brand)
-      return [...new Set(brands)].filter(Boolean)
+      // Агар лозим набошад, метавонед онро нест кунед ё ҳамин тавр бигузоред
+      return [...new Set(state.products.map(p => p.brand))].filter(Boolean).sort()
     },
 
     uniqueCategories: (state) => {
-      const categories = state.products.map(p => p.category)
-      return [...new Set(categories)].filter(Boolean)
+      return [...new Set(state.products.map(p => p.category))].filter(Boolean).sort()
     }
   }
 })

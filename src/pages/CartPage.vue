@@ -12,7 +12,7 @@
     </h2>
 
     <div
-      v-if="!items.length"
+      v-if="!animatedItems.length"
       class="text-center text-gray-600 dark:text-gray-400 italic"
       tabindex="0"
       aria-live="polite"
@@ -20,9 +20,9 @@
       Сабад холӣ аст.
     </div>
 
-    <div v-else class="space-y-6">
+    <transition-group name="fade" tag="div" class="space-y-6" v-else>
       <div
-        v-for="item in items"
+        v-for="item in animatedItems"
         :key="item.product.id"
         class="flex flex-wrap items-center gap-4 p-3 rounded-md
                bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
@@ -57,41 +57,62 @@
           Хориҷ
         </button>
       </div>
+    </transition-group>
 
-      <div
-        class="text-right text-xl font-bold text-gray-900 dark:text-gray-100 select-none"
-        tabindex="0"
-        aria-live="polite"
-      >
-        Ҷамъ: {{ totalPrice }} $
-      </div>
-
-      <button
-        class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md
-               hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-400
-               transition disabled:opacity-50 disabled:cursor-not-allowed"
-        @click="checkout"
-        :disabled="!items.length"
-        aria-disabled="!items.length"
-      >
-        Фармоиш додан
-      </button>
+    <div
+      v-if="animatedItems.length"
+      class="text-right text-xl font-bold text-gray-900 dark:text-gray-100 select-none mt-4"
+      tabindex="0"
+      aria-live="polite"
+    >
+      Ҷамъ: {{ totalPrice }} $
     </div>
+
+    <button
+      class="mt-6 w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md
+             hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-400
+             transition disabled:opacity-50 disabled:cursor-not-allowed"
+      @click="checkout"
+      :disabled="!animatedItems.length"
+      aria-disabled="!animatedItems.length"
+    >
+      Фармоиш додан
+    </button>
   </div>
 </template>
 
 <script setup>
 import { useCartStore } from '../store/cartStore'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const cartStore = useCartStore()
-const items = cartStore.items
 const totalPrice = computed(() => cartStore.totalPrice)
 
-const remove = id => cartStore.remove(id)
+// Копия барои аниматсия
+const animatedItems = ref([...cartStore.items])
+
+const remove = id => {
+  cartStore.remove(id)
+  animatedItems.value = animatedItems.value.filter(item => item.product.id !== id)
+}
 
 const checkout = () => {
   alert('Фармоиш қабул шуд! 😊')
-  cartStore.clear()
+  animatedItems.value = []
+  setTimeout(() => {
+    cartStore.clear()
+  }, 300)
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>

@@ -1,22 +1,27 @@
-<!-- App.vue -->
 <template>
   <div
     class="min-h-screen flex flex-col
            bg-white text-black
            dark:bg-gray-900 dark:text-white
-           transition-colors duration-300"
+           transition-colors duration-300 md:pl-48 pb-20 md:pb-0"
   >
     <Navbar />
+    <Sidebar />
+
     <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <router-view />
     </main>
+
     <Footer />
+    <BottomNav />
   </div>
 </template>
 
 <script setup>
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
+import Sidebar from './components/Sidebar.vue'
+import BottomNav from './components/BottomNav.vue'
 </script>
 
 <style scoped>
